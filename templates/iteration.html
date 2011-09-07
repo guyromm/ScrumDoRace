@@ -42,7 +42,11 @@ window.onload = function() {
 
 	    if (!userstack[st.email]) 
 		{
-		    paper.text(xoffset/2,hght+(h/points.length/2),st.email);
+		    var txt = st.email+'\n';
+		    for (var pi=0;pi<points.length;pi++)
+			if (points[pi].email==st.email) { var pb = points[pi]; break; }
+		    txt+=pb.stories+' stories, '+pb.points+' points';
+		    paper.text(xoffset/2,hght+(h/points.length/2),txt);
 		    userstack[st.email]=0;
 		}
 	    else
@@ -97,6 +101,6 @@ window.onload = function() {
 </head>
 <body>
     <h3>project ${projectname} , iteration ${iteration_name} progress</h3>
-<div style='border:solid red 1px' id='notepad'></div>
+<div id='notepad'></div>
 </body>
 </html>
