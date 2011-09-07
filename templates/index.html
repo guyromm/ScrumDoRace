@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+<head>
+
+</head>
+<body>
+  <h3>here are the iterations currently in stock for project ${projectname}</h3>
+  <ul>
+    % for it in iterations:
+  <li><a href="/iteration/${it[0]}">${it[1]}</a>  (<a href="${SCRUMDO_BASEURL}projects/project/${projectname}/iteration/${it[0]}">scrumdo iteration</a>)</li>
+  % endfor
+  </ul>
+<p>you can also view <a href="/all">all stories</a></p>
+</body>
+</html>

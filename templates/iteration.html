@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+<script src="/static/raphael.js" type="text/javascript" charset="utf-8"></script> 
+<script type='text/javascript'>
+var stories = ${stories|n};
+var points = ${points|n};
+var maxpoints = ${maxpoints|n};
+window.onload = function() {
+
+    //var data2 = [[55, 20, 13, 32, 5, 1, 2, 10], [10, 2, 1, 5, 32, 13, 20, 55], [12, 20, 30]];
+    var W = 1300;
+    var xoffset = W/10;
+    if (xoffset<130) xoffset=130;
+    var PW = W-xoffset;
+    var h = 300;
+    var el = document.getElementById("notepad");
+    el.style.height=h+'px';
+    el.style.width=W+'px';
+    var paper = Raphael(el, W, h);
+    
+    var lineheight = h/h.length;
+    var data=[];
+    var userstack={};
+    console.log("maxpoints  = %o ; participants = %o ; canvas: %o,%o ; drawarea: %o,%o",maxpoints,points.length,W,h,PW,h);
+    var onlyres = /only=([^&]+)/.exec(location.href);
+    if (onlyres) var only=onlyres[1];
+    else var only=null;
+    var storyels={};
+    for (var i=0;i<stories.length;i++)
+	{
+	    var st = stories[i];
+	    if (st.points=='?') var pnt=1;
+	    else pnt=st.points;
+	    var wdth = (PW/maxpoints) * pnt;
+	    if (only && st.email!=only) continue;
+	    for (var j=0;j<points.length;j++)
+		if (st.email==points[j].email) break;
+	    var upos = j;
+	    var hght = (h/points.length) * upos;
+
+
+	    if (!userstack[st.email]) 
+		{
+		    paper.text(xoffset/2,hght+(h/points.length/2),st.email);
+		    userstack[st.email]=0;
+		}
+	    else
+		{ 
+		    //console.log("existing userstack is %o",userstack[st.email]);
+		}
+	    var sx = parseInt(xoffset+userstack[st.email]);
+	    var sy = parseInt(hght);
+	    var tx = parseInt(wdth); //xoffset+userstack[st.email]+wdth);
+	    var ty = parseInt((h/points.length));
+	    
+	    userstack[st.email]=sx-xoffset+tx; //+tx; //wdth;
+	    console.log("story %o (%o), status %o : width of %o points is %o; user %o is at %o : %o,%o,%o,%o (%ox%o) at %o,%o",st,st.id,st.status,st.points,parseInt(wdth),st.email,upos,sx,sy,tx,ty,(tx-sx),(ty-sy),sx,sy);
+	    if (st.status==4) {
+		var fill = '#8DC73E';
+	    }
+	    else if (st.status==3)
+		{
+		    var fill='#FF7F0E';
+		}
+	    else if (st.status==2)
+		{
+		    var fill='#448CCA';
+		}
+	    else if (st.status==1)
+		{
+		    var fill='gray';
+		}
+	    else
+		throw "unknown status "+st.status;
+	    var c = paper.rect(sx,sy,tx,ty).attr({fill:fill,opacity:1});
+	    var textlen = tx/5;
+	    var t = paper.text(sx+(tx/2),sy+(ty/2),st.local_id+' ('+st.points+' pt)\n'+st.summary.slice(0,textlen)+(st.summary.length>textlen?'..':''));
+	    t[0].style.cursor='pointer';
+	    t[0].title=st.summary;
+	    t[0].id = st.id; 
+	    t[0].iteration_id=st.iteration_id;
+	    //t[0].className='story_'+st.id;
+	    storyels[t[0]]=st;
+	    t.node.onclick = function(ev) { 
+		var storyid = /^([0-9]+)/.exec(ev.target.childNodes[0].nodeValue)[1];
+		var rdir = "${SCRUMDO_BASEURL}projects/project/${projectname}/iteration/${iteration_id}#story_"+storyid;
+		location.href=(rdir);
+	    }
+	}
+    console.log(points);
+
+
+    
+}
+</script>
+</head>
+<body>
+    <h3>project ${projectname} , iteration ${iteration_name} progress</h3>
+<div style='border:solid red 1px' id='notepad'></div>
+</body>
+</html>
