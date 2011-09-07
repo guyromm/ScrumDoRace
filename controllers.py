@@ -30,7 +30,7 @@ def index(request):
     return render_to_response('/index.html',{'iterations':iters,'SCRUMDO_BASEURL':SCRUMDO_BASEURL,'projectname':projectname},request)
 def iteration(request,iteration_id=None):
     c2 = conn.cursor(my.cursors.DictCursor)
-    likey= 'github commit%'
+    likey= '%commited to github%'
     joinqry =  "from projects_story s,auth_user u where u.id=s.assignee_id"
     if iteration_id: 
         joinqry+=" and iteration_id=%s "
