@@ -30,25 +30,31 @@ def index(request):
     return render_to_response('/index.html',{'iterations':iters,'SCRUMDO_BASEURL':SCRUMDO_BASEURL,'projectname':projectname},request)
 def iteration(request,iteration_id=None):
     c2 = conn.cursor(my.cursors.DictCursor)
+    likey= 'github commit%'
     joinqry =  "from projects_story s,auth_user u where u.id=s.assignee_id"
     if iteration_id: 
         joinqry+=" and iteration_id=%s "
-        qargs = [int(iteration_id)]
+        qargs = [likey,iteration_id]
+        qa2 = [iteration_id]
     else:
         joinqry+=" and iteration_id in (select id from projects_iteration where project_id=%s)"
-        qargs= set(str(PROJECT_ID))
-    fqry = "select s.id,s.local_id,s.summary,s.status,s.points,s.rank,u.email %s order by assignee_id,rank"%joinqry
+        qargs= [likey,str(PROJECT_ID)]
+        qa2 = [PROJECT_ID]
+    fnames = 's.id,s.local_id,s.summary,s.status,s.points,s.rank,u.email'
+    fqry = "select %s\n,(select count(*) from threadedcomments_threadedcomment where comment like TOKEN and object_id=s.id) commits,count(*) commits\n %s \n group by %s \n order by assignee_id,rank"%(fnames,joinqry,fnames)
+    fqry=fqry.replace('TOKEN','%s')
     print fqry
+    print qargs
     if iteration_id:
-        res = c2.execute(fqry,qargs)
+        res = c2.execute(fqry.replace('\n',''),qargs)
     else:
         res = c2.execute(fqry,qargs)
     stories = c2.fetchall()
     fqry2 = "select u.email,sum(s.points) points,count(*) stories %s group by u.email"%joinqry
     if iteration_id:
-        res = c2.execute(fqry2,qargs)
+        res = c2.execute(fqry2,qa2)
     else:
-        res = c2.execute(fqry2,qargs)
+        res = c2.execute(fqry2,qa2)
     points = c2.fetchall()
     maxpoints = max([p['points'] for p in points])
     c = conn.cursor()

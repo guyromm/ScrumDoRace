@@ -79,7 +79,7 @@ window.onload = function() {
 		throw "unknown status "+st.status;
 	    var c = paper.rect(sx,sy,tx,ty).attr({fill:fill,opacity:1});
 	    var textlen = tx/5;
-	    var t = paper.text(sx+(tx/2),sy+(ty/2),st.local_id+' ('+st.points+' pt)\n'+st.summary.slice(0,textlen)+(st.summary.length>textlen?'..':''));
+	    var t = paper.text(sx+(tx/2),sy+(ty/2),st.local_id+' ('+st.points+' pt), '+st.commits+' commits.\n'+st.summary.slice(0,textlen)+(st.summary.length>textlen?'..':''));
 	    t[0].style.cursor='pointer';
 	    t[0].title=st.summary;
 	    t[0].id = st.id; 
