@@ -1,3 +1,6 @@
 [submodule "noodles"]
 	path = noodles
 	url = git://github.com/guyromm/NoodlesFramework.git
+[submodule "github_commits"]
+	path = github_commits
+	url = git@github.com:guyromm/github-commits.git

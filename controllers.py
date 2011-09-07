@@ -8,6 +8,8 @@ from noodles.http import Response
 import MySQLdb as my
 args = json.loads(open('mysql.json','r').read())
 conn = my.connect(**args)
+from github_commits import compile_report
+
 
 from config import PROJECT_ID,SCRUMDO_BASEURL
 
@@ -28,8 +30,20 @@ def index(request):
     iters = c.fetchall()
     #raise Exception('PROJECT %s iters: %s'%(PROJECT_ID,iters))
     return render_to_response('/index.html',{'iterations':iters,'SCRUMDO_BASEURL':SCRUMDO_BASEURL,'projectname':projectname},request)
-def iteration(request,iteration_id=None):
+def iteration(request,iteration_id=None,how='bypoints'):
     c2 = conn.cursor(my.cursors.DictCursor)
+    if iteration_id:
+        res = c2.execute("select start_date,end_date from projects_iteration where id=%s",iteration_id)
+        start_date,end_date = c2.fetchone().values()
+    else:
+        start_date=None
+        end_date=None
+    print 'running for dates %s - %s'%(start_date,end_date)
+    if how=='bydiff':
+        commits = compile_report.run(start_date=start_date,end_date=end_date,makereport=False)
+    else:
+        commits ={'by_story':{}}
+
     likey= '%commited to github%'
     joinqry =  "from projects_story s,auth_user u where u.id=s.assignee_id"
     if iteration_id: 
@@ -49,17 +63,29 @@ def iteration(request,iteration_id=None):
         res = c2.execute(fqry.replace('\n',''),qargs)
     else:
         res = c2.execute(fqry,qargs)
+    
     stories = c2.fetchall()
+    for st in stories:
+        print('checking if story %s is in %s'%(st['local_id'],commits['by_story'].keys()))
+        if unicode(st['local_id']) in commits['by_story'].keys():
+            st['diff']= commits['by_story'][unicode(st['local_id'])]['diff']
+        else:
+            st['diff']=0
+
+
     fqry2 = "select u.email,sum(s.points) points,count(*) stories %s group by u.email"%joinqry
     if iteration_id:
         res = c2.execute(fqry2,qa2)
     else:
         res = c2.execute(fqry2,qa2)
     points = c2.fetchall()
-    maxpoints = max([p['points'] for p in points])
+    if how=='bydiff':
+        maxpoints=sum([df['diff'] for df in commits['by_story'].values()])
+    else:
+        maxpoints=max([p['points'] for p in points])
     c = conn.cursor()
     if iteration_id:
         itername = getiterationname(c,iteration_id)
     else:
         itername = 'all iterations'
-    return render_to_response('/iteration.html',{'maxpoints':json.dumps(maxpoints),'points':json.dumps(points),'stories':json.dumps(stories),'SCRUMDO_BASEURL':SCRUMDO_BASEURL,'projectname':getprojectname(c),'iteration_id':iteration_id,'iteration_name':itername},request)
+    return render_to_response('/iteration.html',{'maxpoints':json.dumps(maxpoints),'points':json.dumps(points),'stories':json.dumps(stories),'SCRUMDO_BASEURL':SCRUMDO_BASEURL,'projectname':getprojectname(c),'iteration_id':iteration_id,'iteration_name':itername,'how':how},request)

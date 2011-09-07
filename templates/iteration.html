@@ -5,6 +5,7 @@
 <script type='text/javascript'>
 var stories = ${stories|n};
 var points = ${points|n};
+var how = "${how|n}";
 var maxpoints = ${maxpoints|n};
 window.onload = function() {
 
@@ -30,8 +31,18 @@ window.onload = function() {
     for (var i=0;i<stories.length;i++)
 	{
 	    var st = stories[i];
-	    if (st.points=='?') var pnt=1;
-	    else pnt=st.points;
+	    if (how=='bypoints')
+		{
+		    if (st.points=='?') var pnt=1;
+		    else pnt=st.points;
+		}
+	    else if (how=='bydiff')
+		{
+		    pnt=(st.diff!=0?st.diff:(maxpoints/8));
+		    if (!pnt) throw pnt;
+		}
+	    else throw "unknown how "+how;
+	    console.log("pnt = %o",pnt);
 	    var wdth = (PW/maxpoints) * pnt;
 	    if (only && st.email!=only) continue;
 	    for (var j=0;j<points.length;j++)
@@ -79,7 +90,7 @@ window.onload = function() {
 		throw "unknown status "+st.status;
 	    var c = paper.rect(sx,sy,tx,ty).attr({fill:fill,opacity:1});
 	    var textlen = tx/5;
-	    var t = paper.text(sx+(tx/2),sy+(ty/2),st.local_id+' ('+st.points+' pt), '+st.commits+' commits.\n'+st.summary.slice(0,textlen)+(st.summary.length>textlen?'..':''));
+	    var t = paper.text(sx+(tx/2),sy+(ty/2),st.local_id+' ('+st.points+' pt / '+st.diff+' diff), '+st.commits+' commits.\n'+st.summary.slice(0,textlen)+(st.summary.length>textlen?'..':''));
 	    t[0].style.cursor='pointer';
 	    t[0].title=st.summary;
 	    t[0].id = st.id; 
@@ -97,10 +108,12 @@ window.onload = function() {
 
     
 }
+
 </script>
 </head>
 <body>
     <h3>project ${projectname} , iteration ${iteration_name} progress</h3>
+    [<a href="/iteration/${iteration_id}/bydiff">by difflines</a> | <a href="/iteration/${iteration_id}">by points</a> ]
 <div id='notepad'></div>
 </body>
 </html>

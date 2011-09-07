@@ -19,7 +19,9 @@ def get_map():
     # Old style map connecting 
     #map.connect('Route_name', '/route/url', controller='controllerName', action='actionName')
     map.connect('/iteration/{iteration_id}',controller='controllers',action='iteration')
+    map.connect('/iteration/{iteration_id}/{how}',controller='controllers',action='iteration')
     map.connect('/all',controller='controllers',action='iteration')
+    map.connect('/all/{how}',controller='controllers',action='iteration')
     if DEBUG:
         map.connect(None, '/static/{path_info:.*}', controller='static', action='index') #Handling static files
 
