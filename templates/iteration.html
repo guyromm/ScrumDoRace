@@ -38,7 +38,7 @@ window.onload = function() {
 		}
 	    else if (how=='bydiff')
 		{
-		    pnt=(st.diff!=0?st.diff:(maxpoints/8));
+		    pnt=(st.diff!=0?st.diff:1);
 		    if (!pnt) throw pnt;
 		}
 	    else throw "unknown how "+how;

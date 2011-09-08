@@ -31,6 +31,7 @@ def index(request):
     #raise Exception('PROJECT %s iters: %s'%(PROJECT_ID,iters))
     return render_to_response('/index.html',{'iterations':iters,'SCRUMDO_BASEURL':SCRUMDO_BASEURL,'projectname':projectname},request)
 def iteration(request,iteration_id=None,how='bypoints'):
+    if iteration_id=='None': iteration_id=None
     c2 = conn.cursor(my.cursors.DictCursor)
     if iteration_id:
         res = c2.execute("select start_date,end_date from projects_iteration where id=%s",iteration_id)
