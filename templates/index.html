@@ -1,9 +1,5 @@
-<!doctype html>
-<html>
-<head>
-
-</head>
-<body>
+<%inherit file="base.html" />
+<%def name="content()">
   <h3>here are the iterations currently in stock for project ${projectname}</h3>
   <ul>
     % for it in iterations:
@@ -11,5 +7,11 @@
   % endfor
   </ul>
 <p>you can also view <a href="/all">all stories</a></p>
-</body>
-</html>
+
+<h3>Here are the aspects currently inserted for ${projectname}</h3>
+<ul>
+% for a in aspects:
+<li><a href="/support/${a.name}">${a.name}</a></li>
+% endfor
+</ul>
+</%def>
