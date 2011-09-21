@@ -1,6 +1,5 @@
-<!doctype html>
-<html>
-<head>
+<%inherit file="base.html" />
+<%def name="scripts()">
 <script src="/static/raphael.js" type="text/javascript" charset="utf-8"></script> 
 <script type='text/javascript'>
 var stories = ${stories|n};
@@ -110,10 +109,9 @@ window.onload = function() {
 }
 
 </script>
-</head>
-<body>
+</%def>
+<%def name="content()">
     <h3>project ${projectname} , iteration ${iteration_name} progress</h3>
     [<a href="/iteration/${iteration_id}/bydiff">by difflines</a> | <a href="/iteration/${iteration_id}">by points</a> ]
 <div id='notepad'></div>
-</body>
-</html>
+</%def>

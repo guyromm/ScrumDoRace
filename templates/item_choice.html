@@ -1,0 +1,40 @@
+<%inherit file="base.html" />
+<%def name="content()">
+<h2>aspect "${aspect.name}"</h2>
+<% 
+arr = {'item':items,'situation':situations} 
+%>
+% for fn,title in [('item','please choose the items to view'),('situation','configure situations')]:
+<h3>${title}</h3>
+<form method='post'>
+New ${fn}: <input type='text' name='new_${fn}' /><input type='submit' value='Create' />
+</form>
+% if fn=='item':
+<form method='get'>
+  % endif
+<table>
+<thead><tr>
+    % if fn=='item':
+  <th>view</th>
+  % endif
+  <th>item</th>
+  <th>created</th>
+</tr></thead>
+<tbody>
+% for item in arr[fn]:
+<tr>
+  % if fn=='item':
+  <td><input type='checkbox' name="item" value="${item.name}" /></td>
+  % endif
+  <td>${item.name}</td>
+  <td>${item.created_at}</td>
+</tr>
+% endfor
+</tbody>
+</table>
+% if fn=='item':
+<input type='submit' value="View" />
+</form>
+% endif
+% endfor
+</%def>

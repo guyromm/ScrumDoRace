@@ -18,7 +18,15 @@ def get_map():
     
     # Old style map connecting 
     #map.connect('Route_name', '/route/url', controller='controllerName', action='actionName')
+
     map.connect('/iteration/current',controller='controllers',action='iteration',iteration_id='current')
+
+    map.connect('/support/{aspect}',controller='controllers',action='aspect')
+    map.connect('/support/{aspect}/{items_str}',controller='controllers',action='items')
+    map.connect('/support/{aspect}/{items_str}/edit/{observation_id:\d+}',controller='controllers',action='items')
+    map.connect('/support/{aspect}/{items_str}/new/{new_situation}/{new_item}',controller='controllers',action='items')
+
+
     map.connect('/iteration/{iteration_id}',controller='controllers',action='iteration')
     map.connect('/iteration/{iteration_id}/{how}',controller='controllers',action='iteration')
     map.connect('/all',controller='controllers',action='iteration')

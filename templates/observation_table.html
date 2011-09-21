@@ -1,0 +1,72 @@
+<%inherit file="base.html" />
+<%def name="content()">
+<h3>examining aspect "${aspect.name}" of the items ${", ".join([it.name for it in items])}.</h3>
+
+<form method='get'>
+<select name='switch_aspect'>
+% for asp in aspects:
+<option value="${asp.name}">${asp.name}</option>
+% endfor
+</select>
+<input type='submit' value='Switch aspect' />
+</form>
+
+% if msg:
+<h4>${msg}</h4>
+% endif
+
+% if new_form:
+<h4>Enter a new observation:</h4>
+<form method='post'>
+Situation: ${new_situation or 'ALL'} <input type='hidden' name='new_situation' value="${new_situation}" /><br />
+Item: ${new_item or 'ALL'} <input type='hidden' name='new_item' value="${new_item}" /><br />
+Gravity: 
+<select name='observation_gravity'>
+  vals = ${vals}
+  % for gr in ['']+gravities:
+  <option value="${gr}" \
+	  % if vals['gravity']==gr:
+	  selected=1\
+	  % endif
+>${gr}</option>
+  % endfor
+</select> ${err['gravity']}<br />
+Text: <input type='text' name='observation_content' value="${vals['content']}" /> ${err['content']}<br />
+Observed by: <input type='text' name='new_observation_by' value="${vals['observed_by']}" /> ${err['observed_by']}<br />
+<input type='submit' value='\
+% if observation_id:
+Update\
+% else:
+Insert\
+% endif
+' />
+% if observation_id:
+<input type='submit' value='Delete' name='delete_observation' />
+% endif
+</form>
+% endif
+
+<table>
+  <thead><tr>
+      <th>situation \ item</th>
+      % for it in items:
+      <th>${it.name} <a href="/support/${aspect.name}/${items_str}/new/ALL/${it.name}" title="add a situation for all ${it.name}">+</a></th>
+      % endfor
+  </tr></thead>
+% for sit in situations:
+<tr>
+  <td>${sit.name}  <a href="/support/${aspect.name}/${items_str}/new/${sit.name}/ALL" title="add a situation for all ${sit.name}">+</a></td>
+  % for it in items:
+  <td>
+    <ul>
+    % for obk,ob in tree[sit.name][it.name].items():
+    <li style='color:${ob.gravity}'><a href="/support/${aspect.name}/${items_str}/edit/${ob.id}">e</a> ${ob.content}</li>
+    % endfor
+    <a href="/support/${aspect.name}/${items_str}/new/${sit.name}/${it.name}">+</a>
+    </ul>
+  </td>
+  % endfor
+</tr>
+% endfor
+</table>
+</%def>
