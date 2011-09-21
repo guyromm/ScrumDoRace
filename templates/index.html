@@ -5,6 +5,7 @@
 </head>
 <body>
   <h3>here are the iterations currently in stock for project ${projectname}</h3>
+  <a href="/iteration/current">current iteration</a><br />
   <ul>
     % for it in iterations:
   <li><a href="/iteration/${it[0]}">${it[1]}</a>  (<a href="${SCRUMDO_BASEURL}projects/project/${projectname}/iteration/${it[0]}">scrumdo iteration</a>)</li>

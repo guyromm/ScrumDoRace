@@ -33,6 +33,10 @@ def index(request):
 def iteration(request,iteration_id=None,how='bypoints'):
     if iteration_id=='None': iteration_id=None
     c2 = conn.cursor(my.cursors.DictCursor)
+    if iteration_id=='current':
+        res = c2.execute("select id from projects_iteration where project_id=%s and start_date<=now() and end_date>=now()",PROJECT_ID)
+        iteration_id = c2.fetchone()['id']
+
     if iteration_id:
         res = c2.execute("select start_date,end_date from projects_iteration where id=%s",iteration_id)
         start_date,end_date = c2.fetchone().values()
@@ -80,10 +84,13 @@ def iteration(request,iteration_id=None,how='bypoints'):
     else:
         res = c2.execute(fqry2,qa2)
     points = c2.fetchall()
-    if how=='bydiff':
-        maxpoints=sum([df['diff'] for df in commits['by_story'].values()])
-    else:
-        maxpoints=max([p['points'] for p in points])
+    try:
+        if how=='bydiff':
+            maxpoints=sum([df['diff'] for df in commits['by_story'].values()])
+        else:
+            maxpoints=max([p['points'] for p in points])
+    except ValueError:
+        maxpoints=0
     c = conn.cursor()
     if iteration_id:
         itername = getiterationname(c,iteration_id)

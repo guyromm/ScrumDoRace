@@ -18,6 +18,7 @@ def get_map():
     
     # Old style map connecting 
     #map.connect('Route_name', '/route/url', controller='controllerName', action='actionName')
+    map.connect('/iteration/current',controller='controllers',action='iteration',iteration_id='current')
     map.connect('/iteration/{iteration_id}',controller='controllers',action='iteration')
     map.connect('/iteration/{iteration_id}/{how}',controller='controllers',action='iteration')
     map.connect('/all',controller='controllers',action='iteration')
