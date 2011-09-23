@@ -2,6 +2,49 @@
 <html>
 <head>
 ${self.scripts()}
+<style type='text/css'>
+  .observations {
+  width:100%;
+}
+table thead {
+  background-color:#abc;
+}
+.observations td {
+  /*border:solid 1px;*/
+padding:0px;
+}
+.dislink {
+  display:block;
+  height:0;
+  overflow:hidden;
+}
+#switch_aspect_btn {
+  display:none;
+}
+th:hover .dislink , td:hover .dislink {
+  display:inline;
+  height:100%;
+}
+.err {
+  color:red;
+}
+.msg {
+  color:green;
+}
+.bolden {
+background-color:#bbb;
+}
+.hoverform_container {
+  position:absolute;
+  width:100%;
+}
+.hoverform {
+  max-width:40%;
+  margin:0px auto;
+  background-color:white;
+  border:solid 1px blue;
+}
+</style>
 </head>
 <body>
 ${self.content()}

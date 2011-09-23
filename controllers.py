@@ -35,7 +35,10 @@ def aspect(request,aspect):
         session.add(i) ; session.commit()
 
     a = session.query(Aspect).get(aspect)
-    viewitems = request.params.getall('item')
+    if request.params.get('view_all'):
+        viewitems = [i.name for i in session.query(Item).all()]
+    else:
+        viewitems = request.params.getall('item')
     if len(viewitems):
         return Redirect("/support/%s/%s"%(a.name,",".join(viewitems)))
 
@@ -94,7 +97,8 @@ def items(request,aspect,items_str,new_situation=None,new_item=None,observation_
             if not observation_id:
                 setcookie = {'observation_by':request.params.get('new_observation_by')}
                 session.add(o) ; 
-                msg='Succesfull inserted'
+                msg='Succesfully inserted'
+                return Redirect('/support/%s/%s'%(a.name,items_str))
             else:
                 msg='Succesfully updated'
             session.commit()
