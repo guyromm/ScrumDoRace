@@ -35,7 +35,10 @@ def aspect(request,aspect):
         session.add(i) ; session.commit()
 
     a = session.query(Aspect).get(aspect)
-    viewitems = request.params.getall('item')
+    if request.params.get('view_all'):
+        viewitems = [i.name for i in session.query(Item).all()]
+    else:
+        viewitems = request.params.getall('item')
     if len(viewitems):
         return Redirect("/support/%s/%s"%(a.name,",".join(viewitems)))
 
@@ -54,6 +57,26 @@ def items(request,aspect,items_str,new_situation=None,new_item=None,observation_
     item_objs = session.query(Item).filter(Item.name.in_(items_str.split(','))).all()
     msg=''
     obsby = request.cookies.get('observation_by','')
+
+    #see if we have an existing story
+    cur = conn.cursor()
+    qry = "select id from projects_storytag where project_id=%s and name=%s"
+    res = cur.execute(qry,(PROJECT_ID,'observation %s'%observation_id))
+    storyobs = cur.fetchone()
+    if storyobs: 
+        res2 = cur.execute("select story_id from projects_storytagging where tag_id=%s",storyobs[0])
+        
+        story_id = cur.fetchone()[0]
+        res = cur.execute("select local_id,iteration_id from projects_story where id=%s",story_id)
+        fo = cur.fetchone()
+        assert fo,"could not fetch story %s for observation %s"%(story_id,storyobs)
+        local_id = fo[0]
+        iteration_id = fo[1]
+    else:
+        story_id = None
+        local_id = None
+        iteration_id=None
+
     if (new_situation and new_item) or observation_id:
         #Raise Exception('new_sit: %s, new_it: %s, obs_id: %s'%(new_situation,new_item,observation_id))
         if observation_id:
@@ -94,10 +117,36 @@ def items(request,aspect,items_str,new_situation=None,new_item=None,observation_
             if not observation_id:
                 setcookie = {'observation_by':request.params.get('new_observation_by')}
                 session.add(o) ; 
-                msg='Succesfull inserted'
+                msg='Succesfully inserted'
+                return Redirect('/support/%s/%s'%(a.name,items_str))
             else:
                 msg='Succesfully updated'
             session.commit()
+            if request.params.get('create_story'):
+
+                if (story_id==None): #can we insert
+                    #find out a new local id
+                    res = cur.execute("select max(local_id) from projects_story where project_id=%s",PROJECT_ID)
+                    local_id = cur.fetchone()[0]+1
+                    #find out the backlog iteration id
+                    res = cur.execute("select id from projects_iteration where project_id=%s and default_iteration=true",PROJECT_ID)
+                    iteration_id = cur.fetchone()[0]
+
+                    insvals = {'project_id':PROJECT_ID,'summary':u'observation: %s'%o.content,'created':now(),'status':1,'local_id':local_id,'iteration_id':iteration_id}
+                    qry = "insert into projects_story (%s) values (REPL)"%(",".join(insvals.keys()))
+                    qry = qry.replace('REPL',','.join('%s' for val in insvals))
+                    res = cur.execute(qry,insvals.values())
+                    assert res==1
+                    story_id = conn.insert_id()
+                    res = cur.execute("insert into projects_storytag (project_id,name) values(%s,%s)",(PROJECT_ID,'observation %s'%o.id))
+                    assert res==1
+                    tagid = conn.insert_id()
+                    res = cur.execute("insert into projects_storytagging (tag_id,story_id) values(%s,%s)",(tagid,story_id))
+                    assert res==1
+                    conn.commit()
+                    msg ="Succesfully inserted story %s"%story_id
+                    #raise Exception(story_id)
+                    
         #raise Exception('%s from %s'%(vals,request.params))
         new_form=True
     else:
@@ -149,7 +198,10 @@ def items(request,aspect,items_str,new_situation=None,new_item=None,observation_
                                                          ,'vals':vals
                                                          ,'observation_id':observation_id
                                                        ,'obsby':obsby
-                                                         ,'msg':msg},request)
+                                                         ,'msg':msg
+                                                       ,'story_id':story_id
+                                                       ,'local_id':local_id
+                                                       ,'iteration_id':iteration_id},request)
     rsp.body = cont
     return rsp
 

@@ -1,23 +1,27 @@
 <%inherit file="base.html" />
 <%def name="content()">
-<h3>examining aspect "${aspect.name}" of the items ${", ".join([it.name for it in items])}.</h3>
-
 <form method='get'>
-<select name='switch_aspect'>
+examining aspect 
+<select name='switch_aspect' onchange='document.getElementById("switch_aspect_btn").click()'>
 % for asp in aspects:
-<option value="${asp.name}">${asp.name}</option>
+<option value="${asp.name}" \
+% if asp.name==aspect.name:
+selected=1\
+% endif
+>${asp.name}</option>
 % endfor
-</select>
-<input type='submit' value='Switch aspect' />
+</select> of the items ${", ".join([it.name for it in items])}. 
+% if msg:
+<span class='msg'>${msg}</span>\
+% endif
+<input type='submit' value='Switch aspect' id='switch_aspect_btn' />
 </form>
 
-% if msg:
-<h4>${msg}</h4>
-% endif
 
 % if new_form:
+<div class='hoverform_container'>
 <h4>Enter a new observation:</h4>
-<form method='post'>
+<form method='post' class='hoverform'>
 Situation: ${new_situation or 'ALL'} <input type='hidden' name='new_situation' value="${new_situation}" /><br />
 Item: ${new_item or 'ALL'} <input type='hidden' name='new_item' value="${new_item}" /><br />
 Gravity: 
@@ -30,9 +34,9 @@ Gravity:
 	  % endif
 >${gr}</option>
   % endfor
-</select> ${err['gravity']}<br />
-Text: <input type='text' name='observation_content' value="${vals['content']}" /> ${err['content']}<br />
-Observed by: <input type='text' name='new_observation_by' value="${vals['observed_by']}" /> ${err['observed_by']}<br />
+</select> ${er('gravity')}<br />
+Text: <input type='text' name='observation_content' value="${vals['content']}" /> ${er('content')}<br />
+Observed by: <input type='text' name='new_observation_by' value="${vals['observed_by']}" /> ${er('observed_by')}<br />
 <input type='submit' value='\
 % if observation_id:
 Update\
@@ -42,31 +46,51 @@ Insert\
 ' />
 % if observation_id:
 <input type='submit' value='Delete' name='delete_observation' />
+% if story_id:
+## http://scrum.iskonsoft.com.ua/projects/project/scratchcards/iteration/10009#story_1371
+Is linked to ScrumDo story <a href="http://scrum.iskonsoft.com.ua/projects/project/scratchcards/iteration/${iteration_id}#story_${story_id}">${local_id} (${story_id})</a>
+% else:
+<input type='submit' value='Create ScrumDo story' name='create_story' />
+% endif
 % endif
 </form>
+</div>
 % endif
 
-<table>
+<table class='observations'>
   <thead><tr>
       <th>situation \ item</th>
       % for it in items:
-      <th>${it.name} <a href="/support/${aspect.name}/${items_str}/new/ALL/${it.name}" title="add a situation for all ${it.name}">+</a></th>
+      <th>${it.name} <a href="/support/${aspect.name}/${items_str}/new/ALL/${it.name}" title="add a situation for all ${it.name}" class='dislink'>+</a></th>
       % endfor
   </tr></thead>
+<% cnt=0 %>
 % for sit in situations:
-<tr>
-  <td>${sit.name}  <a href="/support/${aspect.name}/${items_str}/new/${sit.name}/ALL" title="add a situation for all ${sit.name}">+</a></td>
+<tr \
+% if cnt % 2 ==0:
+style='background-color:#eee'\
+% endif
+<% cnt+=1 %>
+>
+  <td>${sit.name}  <a href="/support/${aspect.name}/${items_str}/new/${sit.name}/ALL" title="add a situation for all ${sit.name}" class='dislink'>+</a></td>
   % for it in items:
   <td>
     <ul>
     % for obk,ob in tree[sit.name][it.name].items():
-    <li style='color:${ob.gravity}'><a href="/support/${aspect.name}/${items_str}/edit/${ob.id}">e</a> ${ob.content}</li>
+    <li style='color:${ob.gravity}' \
+% if observation_id and ob.id==int(observation_id):
+class='bolden'\
+% endif
+><a href="/support/${aspect.name}/${items_str}/edit/${ob.id}" class='dislink'>e</a> ${ob.content}</li>
     % endfor
-    <a href="/support/${aspect.name}/${items_str}/new/${sit.name}/${it.name}">+</a>
+    <a href="/support/${aspect.name}/${items_str}/new/${sit.name}/${it.name}" class='dislink'>+</a>
     </ul>
   </td>
   % endfor
 </tr>
 % endfor
 </table>
+</%def>
+<%def name="er(tp)">
+<span class='err'>${err[tp]}</span>\
 </%def>
