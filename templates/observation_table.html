@@ -46,6 +46,12 @@ Insert\
 ' />
 % if observation_id:
 <input type='submit' value='Delete' name='delete_observation' />
+% if story_id:
+## http://scrum.iskonsoft.com.ua/projects/project/scratchcards/iteration/10009#story_1371
+Is linked to ScrumDo story <a href="http://scrum.iskonsoft.com.ua/projects/project/scratchcards/iteration/${iteration_id}#story_${story_id}">${local_id} (${story_id})</a>
+% else:
+<input type='submit' value='Create ScrumDo story' name='create_story' />
+% endif
 % endif
 </form>
 </div>
