@@ -65,13 +65,18 @@ def items(request,aspect,items_str,new_situation=None,new_item=None,observation_
     storyobs = cur.fetchone()
     if storyobs: 
         res2 = cur.execute("select story_id from projects_storytagging where tag_id=%s",storyobs[0])
-        
-        story_id = cur.fetchone()[0]
-        res = cur.execute("select local_id,iteration_id from projects_story where id=%s",story_id)
         fo = cur.fetchone()
-        assert fo,"could not fetch story %s for observation %s"%(story_id,storyobs)
-        local_id = fo[0]
-        iteration_id = fo[1]
+        if fo:
+            story_id = cur.fetchone()[0]
+            res = cur.execute("select local_id,iteration_id from projects_story where id=%s",story_id)
+            fo = cur.fetchone()
+            assert fo,"could not fetch story %s for observation %s"%(story_id,storyobs)
+            local_id = fo[0]
+            iteration_id = fo[1]
+        else:
+            iteration_id = None
+            story_id = None
+            local_id = None
     else:
         story_id = None
         local_id = None
