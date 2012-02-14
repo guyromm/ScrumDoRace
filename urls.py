@@ -31,6 +31,7 @@ def get_map():
     map.connect('/iteration/{iteration_id}/{how}',controller='controllers',action='iteration')
     map.connect('/all',controller='controllers',action='iteration')
     map.connect('/all/{how}',controller='controllers',action='iteration')
+    map.connect('/story/{story_id}',controller='controllers',action='story_redir')
     if DEBUG:
         map.connect(None, '/static/{path_info:.*}', controller='static', action='index') #Handling static files
 

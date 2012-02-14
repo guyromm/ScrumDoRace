@@ -123,7 +123,10 @@ def items(request,aspect,items_str,new_situation=None,new_item=None,observation_
                 setcookie = {'observation_by':request.params.get('new_observation_by')}
                 session.add(o) ; 
                 msg='Succesfully inserted'
-                return Redirect('/support/%s/%s'%(a.name,items_str))
+                rt = Redirect('/support/%s/%s'%(a.name,items_str))
+                for k,v in setcookie.items():
+                    rt.set_cookie(k,v)
+                return rt
             else:
                 msg='Succesfully updated'
             session.commit()
@@ -225,7 +228,11 @@ def iteration(request,iteration_id=None,how='bypoints'):
     c2 = conn.cursor(my.cursors.DictCursor)
     if iteration_id=='current':
         res = c2.execute("select id from projects_iteration where project_id=%s and start_date<=now() and end_date>=now()",PROJECT_ID)
-        iteration_id = c2.fetchone()['id']
+        fo = c2.fetchone()
+        if fo:
+            iteration_id = fo['id']
+        else:
+            iteration_id=None
 
     if iteration_id:
         res = c2.execute("select start_date,end_date from projects_iteration where id=%s",iteration_id)
@@ -287,3 +294,14 @@ def iteration(request,iteration_id=None,how='bypoints'):
     else:
         itername = 'all iterations'
     return render_to_response('/iteration.html',{'maxpoints':json.dumps(maxpoints),'points':json.dumps(points),'stories':json.dumps(stories),'SCRUMDO_BASEURL':SCRUMDO_BASEURL,'projectname':getprojectname(c),'iteration_id':iteration_id,'iteration_name':itername,'how':how},request)
+
+
+def story_redir(request,story_id):
+    qstr = "select id,iteration_id from projects_story where local_id=%d and project_id=%d"%(int(story_id),int(PROJECT_ID))
+    c2 = conn.cursor()
+    c2.execute(qstr)
+    rid,itid = (c2.fetchall()[0])
+    projname = getprojectname(c2)
+    #http://scrum.ezscratch.com/projects/project/scratchcards/iteration/10018#story_1493
+    return Redirect('%sprojects/project/%s/iteration/%s#story_%s'%(SCRUMDO_BASEURL,projname,itid,rid))
+    

@@ -24,16 +24,16 @@ situation_tbl = Table('situation',meta
                       ,Column('name',Unicode(32),primary_key=True,unique=True)
                       ,Column('created_at',DateTime(),default=now))
 
-gravities = ['gray','orange','red']
+gravities = ['green','gray','orange','red']
 observation_tbl = Table('observation',meta
                         ,Column('id',Integer(),primary_key=True,unique=True)
                         ,Column('created_at',DateTime(),default=now,nullable=False)
                         ,Column('aspect',ForeignKey('aspect.name'),nullable=False)
                         ,Column('item',ForeignKey('item.name'),nullable=True)
                         ,Column('situation',ForeignKey('situation.name'),nullable=True)
-                        ,Column('content',String(256),nullable=False)
+                        ,Column('content',Unicode(256),nullable=False)
                         ,Column('gravity',Enum(*gravities),nullable=False)
-                        ,Column('observed_by',String(32),nullable=False)
+                        ,Column('observed_by',Unicode(32),nullable=False)
 )
 class Observation(object): pass
 class Aspect(object): pass

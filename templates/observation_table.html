@@ -1,7 +1,7 @@
 <%inherit file="base.html" />
 <%def name="content()">
 <form method='get'>
-examining aspect 
+<a href="/">home</a> :: <a href="/support/${aspect.name}">${aspect.name}</a> :: examining aspect 
 <select name='switch_aspect' onchange='document.getElementById("switch_aspect_btn").click()'>
 % for asp in aspects:
 <option value="${asp.name}" \
